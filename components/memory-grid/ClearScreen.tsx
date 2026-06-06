@@ -161,6 +161,13 @@ export default function ClearScreen({
           <ResultRow label={t.mistakes} value={String(mistakes)} />
           <ResultRow label={t.difficulty.charAt(0).toUpperCase() + t.difficulty.slice(1)}
                      value={t[difficulty]} />
+          {/* Date stamp */}
+          <ResultRow
+            label={lang === 'ja' ? '日付' : 'Date'}
+            value={new Date().toLocaleDateString(lang === 'ja' ? 'ja-JP' : 'en-US', {
+              month: 'short', day: 'numeric', year: 'numeric',
+            })}
+          />
         </div>
 
         {/* ── Action buttons ────────────────────────── */}

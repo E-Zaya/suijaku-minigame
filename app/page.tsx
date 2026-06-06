@@ -1,3 +1,5 @@
+'use client';
+
 import dynamic from "next/dynamic";
 
 /* Load the game client-only so localStorage is always available

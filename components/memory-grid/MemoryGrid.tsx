@@ -1,18 +1,17 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { T, DIFFICULTY_CONFIG, CARD_ICONS } from '@/lib/memory-grid/constants';
+import { DIFFICULTY_CONFIG, CARD_ICONS } from '@/lib/memory-grid/constants';
 import { calcScore } from '@/lib/memory-grid/scoring';
 import { saveBest, isNewBest } from '@/lib/memory-grid/storage';
 import StartScreen from './StartScreen';
+import SidePanel from './SidePanel';
 import GameBoard from './GameBoard';
-import GameStats from './GameStats';
 import ClearScreen from './ClearScreen';
 import type { CardData, Difficulty, GamePhase, Language, Theme } from './types';
 
 /* ── Utilities ───────────────────────────────────────── */
 
-/** Fisher-Yates shuffle – returns a new array */
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -22,7 +21,6 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/** Create a shuffled deck for the chosen difficulty */
 function buildDeck(difficulty: Difficulty): CardData[] {
   const { pairs } = DIFFICULTY_CONFIG[difficulty];
   const deck: CardData[] = [];
@@ -30,7 +28,6 @@ function buildDeck(difficulty: Difficulty): CardData[] {
     deck.push({ id: pairId * 2,     pairId, iconName, isFlipped: false, isMatched: false });
     deck.push({ id: pairId * 2 + 1, pairId, iconName, isFlipped: false, isMatched: false });
   });
-  /* Reassign ids after shuffle so id === array index */
   return shuffle(deck).map((c, i) => ({ ...c, id: i }));
 }
 
@@ -39,38 +36,32 @@ function buildDeck(difficulty: Difficulty): CardData[] {
    ══════════════════════════════════════════════════════ */
 export default function MemoryGrid() {
 
-  /* ── Settings (lazy-initialised from localStorage) ──
-     Safe: this component loads with ssr:false in page.tsx */
-  const [lang,  setLang]  = useState<Language>(
-    () => (localStorage.getItem('mg_lang')  as Language) || 'en'
-  );
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem('mg_theme') as Theme) || 'auto'
-  );
+  /* ── Settings (lazy-init from localStorage — safe with ssr:false) ── */
+  const [lang,  setLang]  = useState<Language>(() => (localStorage.getItem('mg_lang')  as Language) || 'en');
+  const [theme, setTheme] = useState<Theme>(   () => (localStorage.getItem('mg_theme') as Theme)    || 'auto');
 
   /* ── Game state ──────────────────────────────────── */
-  const [phase,      setPhase]      = useState<GamePhase>('start');
-  const [difficulty, setDifficulty] = useState<Difficulty>('normal');
-  const [cards,      setCards]      = useState<CardData[]>([]);
+  const [phase,       setPhase]       = useState<GamePhase>('start');
+  const [difficulty,  setDifficulty]  = useState<Difficulty>('normal');
+  const [cards,       setCards]       = useState<CardData[]>([]);
   const [mismatchIds, setMismatchIds] = useState<number[]>([]);
-  const [mistakes,    setMistakes]   = useState(0);
-  const [elapsed,     setElapsed]    = useState(0);
-  const [isRunning,   setIsRunning]  = useState(false);
-  const [finalScore,  setFinalScore] = useState(0);
-  const [newBest,     setNewBest]    = useState(false);
+  const [mistakes,    setMistakes]    = useState(0);
+  const [elapsed,     setElapsed]     = useState(0);
+  const [isRunning,   setIsRunning]   = useState(false);
+  const [finalScore,  setFinalScore]  = useState(0);
+  const [newBest,     setNewBest]     = useState(false);
 
-  /* Refs for values needed inside callbacks without stale closures */
-  const cardsRef      = useRef<CardData[]>([]);   // mirrors cards state
-  const flippedRef    = useRef<number[]>([]);      // first-card slot (no re-render needed)
-  const elapsedRef    = useRef(0);
-  const mistakesRef   = useRef(0);
-  const matchedRef    = useRef(0);
-  const isLockedRef   = useRef(false);             // blocks clicks during mismatch delay
+  /* Refs — avoid stale closures inside setTimeout / setInterval */
+  const cardsRef    = useRef<CardData[]>([]);
+  const flippedRef  = useRef<number[]>([]);
+  const elapsedRef  = useRef(0);
+  const mistakesRef = useRef(0);
+  const matchedRef  = useRef(0);
+  const lockedRef   = useRef(false);
 
-  /* Keep cardsRef in sync whenever cards state changes */
   useEffect(() => { cardsRef.current = cards; }, [cards]);
 
-  /* ── Sync theme to <html data-theme> ─────────────── */
+  /* ── Theme → <html data-theme> ───────────────────── */
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'auto') root.removeAttribute('data-theme');
@@ -93,7 +84,7 @@ export default function MemoryGrid() {
     mistakesRef.current = 0;
     matchedRef.current  = 0;
     flippedRef.current  = [];
-    isLockedRef.current = false;
+    lockedRef.current   = false;
 
     const deck = buildDeck(diff);
     cardsRef.current = deck;
@@ -109,26 +100,25 @@ export default function MemoryGrid() {
     setPhase('playing');
   }, []);
 
-  /* ── Card tap handler (imperative style for clarity) ─ */
+  /* ── Card tap handler ────────────────────────────── */
   const handleCardClick = useCallback((id: number) => {
-    if (isLockedRef.current) return;
+    if (lockedRef.current) return;
 
     const current = cardsRef.current;
     const card = current[id];
     if (!card || card.isFlipped || card.isMatched) return;
 
-    /* Start timer on first tap */
     if (!isRunning) setIsRunning(true);
 
     if (flippedRef.current.length === 0) {
-      /* ── First card of the pair ─────────────────── */
+      /* First card */
       flippedRef.current = [id];
       const flipped = current.map((c, i) => i === id ? { ...c, isFlipped: true } : c);
       cardsRef.current = flipped;
       setCards(flipped);
 
     } else {
-      /* ── Second card – evaluate match ────────────── */
+      /* Second card — evaluate */
       const firstId = flippedRef.current[0];
       flippedRef.current = [];
 
@@ -143,9 +133,7 @@ export default function MemoryGrid() {
         setCards(matched);
         matchedRef.current += 1;
 
-        const { pairs } = DIFFICULTY_CONFIG[difficulty];
-        if (matchedRef.current === pairs) {
-          /* All pairs found – game over */
+        if (matchedRef.current === DIFFICULTY_CONFIG[difficulty].pairs) {
           const score = calcScore(elapsedRef.current, mistakesRef.current);
           const nb    = isNewBest(score, difficulty);
           if (nb) {
@@ -160,17 +148,16 @@ export default function MemoryGrid() {
           setFinalScore(score);
           setNewBest(nb);
           setIsRunning(false);
-          /* Small pause so the last flip animation is visible */
           setTimeout(() => setPhase('cleared'), 420);
         }
       } else {
-        /* ❌ Mismatch – show both cards briefly, then flip back */
+        /* ❌ Mismatch */
         cardsRef.current = withSecond;
         setCards(withSecond);
         mistakesRef.current += 1;
         setMistakes(mistakesRef.current);
         setMismatchIds([firstId, id]);
-        isLockedRef.current = true;
+        lockedRef.current = true;
 
         setTimeout(() => {
           const reverted = cardsRef.current.map((c, i) =>
@@ -179,7 +166,7 @@ export default function MemoryGrid() {
           cardsRef.current = reverted;
           setCards(reverted);
           setMismatchIds([]);
-          isLockedRef.current = false;
+          lockedRef.current = false;
         }, 820);
       }
     }
@@ -191,7 +178,6 @@ export default function MemoryGrid() {
     setLang(next);
     localStorage.setItem('mg_lang', next);
   };
-
   const toggleTheme = () => {
     const cycle: Theme[] = ['auto', 'light', 'dark'];
     const next = cycle[(cycle.indexOf(theme) + 1) % cycle.length];
@@ -199,7 +185,27 @@ export default function MemoryGrid() {
     localStorage.setItem('mg_theme', next);
   };
 
-  const t = T[lang];
+  /* Reusable JSX for the two-column game layout */
+  const boardLayout = (interactive: boolean) => (
+    <div className="flex flex-col md:flex-row gap-4 min-h-screen p-3 md:p-5 items-start">
+      <SidePanel
+        lang={lang}
+        elapsed={elapsed}
+        mistakes={mistakes}
+        difficulty={difficulty}
+        onRestart={() => startGame(difficulty)}
+        onBack={() => setPhase('start')}
+      />
+      <div className="flex-1 w-full min-w-0">
+        <GameBoard
+          cards={cards}
+          cols={DIFFICULTY_CONFIG[difficulty].cols}
+          mismatchIds={interactive ? mismatchIds : []}
+          onCardClick={interactive ? handleCardClick : () => {}}
+        />
+      </div>
+    </div>
+  );
 
   /* ══════════════════════════════════════════════════
      Render
@@ -207,7 +213,6 @@ export default function MemoryGrid() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--mg-bg)' }}>
 
-      {/* ── Start screen ──────────────────────────── */}
       {phase === 'start' && (
         <StartScreen
           lang={lang}
@@ -220,73 +225,12 @@ export default function MemoryGrid() {
         />
       )}
 
-      {/* ── Playing screen ────────────────────────── */}
-      {phase === 'playing' && (
-        <div className="flex flex-col items-center gap-4 px-4 pt-5 pb-8 min-h-screen">
+      {phase === 'playing' && boardLayout(true)}
 
-          {/* Title bar */}
-          <div className="w-full max-w-sm flex items-center justify-between">
-            <h1
-              className="text-sm font-semibold tracking-wide"
-              style={{ color: 'var(--mg-text-secondary)' }}
-            >
-              {t.title}
-            </h1>
-            <span
-              className="text-xs px-2.5 py-0.5 rounded-full"
-              style={{ background: 'var(--mg-surface)', color: 'var(--mg-text-muted)' }}
-            >
-              {t[difficulty]}
-            </span>
-          </div>
-
-          <GameStats
-            lang={lang}
-            elapsed={elapsed}
-            mistakes={mistakes}
-            difficulty={difficulty}
-          />
-
-          <GameBoard
-            cards={cards}
-            cols={DIFFICULTY_CONFIG[difficulty].cols}
-            mismatchIds={mismatchIds}
-            onCardClick={handleCardClick}
-          />
-
-          <button
-            onClick={() => startGame(difficulty)}
-            className="mt-auto text-sm px-5 py-2 rounded-full border transition-all
-                       opacity-50 hover:opacity-100 active:scale-[0.97]"
-            style={{
-              borderColor: 'var(--mg-border)',
-              color: 'var(--mg-text-secondary)',
-            }}
-            aria-label="Restart current game"
-          >
-            ↺ {t.restart}
-          </button>
-        </div>
-      )}
-
-      {/* ── Cleared state ─────────────────────────── */}
       {phase === 'cleared' && (
         <>
           {/* Board stays visible behind the overlay */}
-          <div className="flex flex-col items-center gap-4 px-4 pt-5 pb-8 min-h-screen">
-            <div className="w-full max-w-sm">
-              <h1 className="text-sm font-semibold" style={{ color: 'var(--mg-text-secondary)' }}>
-                {t.title}
-              </h1>
-            </div>
-            <GameStats lang={lang} elapsed={elapsed} mistakes={mistakes} difficulty={difficulty} />
-            <GameBoard
-              cards={cards}
-              cols={DIFFICULTY_CONFIG[difficulty].cols}
-              mismatchIds={[]}
-              onCardClick={() => {}}
-            />
-          </div>
+          {boardLayout(false)}
 
           <ClearScreen
             lang={lang}
@@ -300,6 +244,7 @@ export default function MemoryGrid() {
           />
         </>
       )}
+
     </div>
   );
 }

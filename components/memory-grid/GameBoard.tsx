@@ -10,6 +10,12 @@ interface GameBoardProps {
   onCardClick: (id: number) => void;
 }
 
+/* ══════════════════════════════════════════════════════
+   GameBoard
+   Wraps the card grid in the neumorphic board container
+   with the "BOARD" pill label at the top, matching the
+   reference image layout.
+   ══════════════════════════════════════════════════════ */
 export default function GameBoard({
   cards,
   cols,
@@ -17,13 +23,23 @@ export default function GameBoard({
   onCardClick,
 }: GameBoardProps) {
   return (
-    /* Outer wrapper limits board width and centres it */
-    <div className="w-full max-w-sm mx-auto px-1">
+    <div
+      className="w-full flex flex-col items-center gap-4 rounded-3xl p-4"
+      style={{ background: 'var(--mg-surface)', boxShadow: 'var(--mg-shadow)' }}
+    >
+      {/* BOARD label pill — matches the reference header tag style */}
+      <span
+        className="text-[10px] px-3 py-1 rounded-full tracking-[0.18em] uppercase border"
+        style={{ borderColor: 'var(--mg-border)', color: 'var(--mg-text-muted)' }}
+      >
+        BOARD
+      </span>
+
+      {/* Card grid — columns driven by difficulty */}
       <div
         role="grid"
         aria-label="Memory card grid"
-        className="grid gap-[5px]"
-        /* Column count is dynamic – driven by difficulty setting */
+        className="grid gap-[5px] w-full"
         style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
       >
         {cards.map((card) => (

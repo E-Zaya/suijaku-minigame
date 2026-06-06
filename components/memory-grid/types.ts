@@ -5,10 +5,10 @@ export type Language   = 'en' | 'ja';
 export type GamePhase  = 'start' | 'playing' | 'cleared';
 export type Theme      = 'auto' | 'light' | 'dark';
 
-/** Names of lucide-react icons used as card faces */
+/** Emoji used as card faces – instantly recognisable animals */
 export type IconName =
-  | 'Sparkles' | 'Gem'    | 'Rocket' | 'Moon' | 'Zap'
-  | 'Brain'    | 'Code'   | 'Coffee' | 'Gamepad2' | 'Star';
+  | '🦊' | '🐼' | '🦁' | '🐸' | '🐧'
+  | '🦉' | '🐙' | '🦋' | '🐢' | '🐝';
 
 export interface CardData {
   /** Index in the shuffled array – used as the stable identity */

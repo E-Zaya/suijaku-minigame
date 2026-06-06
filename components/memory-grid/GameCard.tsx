@@ -1,17 +1,7 @@
 'use client';
 
-import {
-  Sparkles, Gem, Rocket, Moon, Zap,
-  Brain, Code, Coffee, Gamepad2, Star,
-  type LucideIcon,
-} from 'lucide-react';
-import type { CardData, IconName } from './types';
-
-/* Map icon name strings to the actual Lucide components */
-const ICON_MAP: Record<IconName, LucideIcon> = {
-  Sparkles, Gem, Rocket, Moon, Zap,
-  Brain, Code, Coffee, Gamepad2, Star,
-};
+import { ICON_LABELS } from '@/lib/memory-grid/constants';
+import type { CardData } from './types';
 
 interface GameCardProps {
   card: CardData;
@@ -20,33 +10,31 @@ interface GameCardProps {
 }
 
 export default function GameCard({ card, isMismatch, onClick }: GameCardProps) {
-  const Icon = ICON_MAP[card.iconName];
   const isVisible = card.isFlipped || card.isMatched;
+  const label = ICON_LABELS[card.iconName];
 
-  /* Build the class string for the 3-D inner element */
   const innerClass = [
     'mg-card-inner',
-    isVisible      ? 'is-flipped'    : '',
-    isMismatch     ? 'is-mismatch'   : '',
-    card.isMatched ? 'mg-card-matched' : '',
+    isVisible      ? 'is-flipped'     : '',
+    isMismatch     ? 'is-mismatch'    : '',
+    card.isMatched ? 'mg-card-matched': '',
   ].filter(Boolean).join(' ');
 
   return (
     <button
-      /* perspective lives on the wrapper so transform-style works correctly */
-      className="mg-card-wrapper block w-full aspect-square p-0 bg-transparent border-0
-                 cursor-pointer rounded-2xl focus-visible:outline-none
-                 focus-visible:ring-2 focus-visible:ring-offset-1
+      /* perspective wrapper sits on the button so preserve-3d works */
+      className="mg-card-wrapper block w-full aspect-[3/4] p-0 bg-transparent border-0
+                 cursor-pointer rounded-2xl
+                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1
                  disabled:cursor-default"
-      style={{ focusRingColor: 'var(--mg-grad-from)' } as React.CSSProperties}
       onClick={() => onClick(card.id)}
       disabled={card.isMatched}
-      aria-label={isVisible ? card.iconName : 'Hidden card'}
+      aria-label={isVisible ? label : 'Hidden card'}
       aria-pressed={isVisible}
     >
       <div className={innerClass} style={{ borderRadius: 'inherit' }}>
 
-        {/* ── Back face – shown before flip ─────────── */}
+        {/* ── Back face – subtle gradient with dot pattern ─── */}
         <div
           className="mg-card-face mg-card-back-face rounded-2xl"
           style={{
@@ -55,30 +43,31 @@ export default function GameCard({ card, isMismatch, onClick }: GameCardProps) {
           }}
           aria-hidden
         >
-          {/* Subtle dot pattern for visual texture */}
+          {/* Subtle repeating dot texture */}
           <div
-            className="w-full h-full rounded-2xl opacity-20"
+            className="w-full h-full rounded-2xl opacity-15"
             style={{
               backgroundImage:
                 'radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px)',
-              backgroundSize: '10px 10px',
+              backgroundSize: '11px 11px',
             }}
           />
         </div>
 
-        {/* ── Front face – shown after flip ─────────── */}
+        {/* ── Front face – emoji on a clean surface ── */}
         <div
-          className="mg-card-face mg-card-front-face rounded-2xl"
+          className="mg-card-face mg-card-front-face rounded-2xl select-none"
           style={{ boxShadow: 'var(--mg-shadow-sm)' }}
           aria-hidden={!isVisible}
         >
-          <Icon
-            size={28}
-            strokeWidth={1.6}
-            /* Matched cards turn amber; others use the theme icon colour */
-            color={card.isMatched ? '#F59E0B' : 'var(--mg-card-icon)'}
-            aria-hidden
-          />
+          <span
+            className="leading-none"
+            style={{ fontSize: 'clamp(1.6rem, 7vw, 2.2rem)' }}
+            role="img"
+            aria-label={label}
+          >
+            {card.iconName}
+          </span>
         </div>
 
       </div>

@@ -22,12 +22,15 @@
 
   /* Card */
   --mg-card-front:     #F8F4EE;
-  --mg-card-icon:      #4A7CF6;
-  --mg-card-matched-bg:rgba(74, 124, 246, 0.08);
+  --mg-card-icon:      #5A6B86;
+  --mg-card-matched-bg:rgba(90, 107, 134, 0.10);
 
-  /* Gradients (card back + CTA button) */
-  --mg-grad-from:      #4A7CF6;
-  --mg-grad-to:        #7C3AED;
+  /* Refined accent (scores, highlights) */
+  --mg-accent:         #5A6B86;
+
+  /* Gradients (card back + CTA button) – muted slate, not flashy */
+  --mg-grad-from:      #6E7E99;
+  --mg-grad-to:        #8A8299;
 
   /* Neumorphic shadows */
   --mg-shadow:   4px 4px 10px rgba(0,0,0,0.07), -3px -3px 8px rgba(255,255,255,0.85);
@@ -35,7 +38,7 @@
   --mg-shadow-in:inset 2px 2px 6px rgba(0,0,0,0.07), inset -2px -2px 5px rgba(255,255,255,0.70);
 
   /* Match glow */
-  --mg-match-ring: rgba(74, 124, 246, 0.45);
+  --mg-match-ring: rgba(90, 107, 134, 0.40);
 }
 
 /* ── 2. System dark mode ────────────────────────────── */
@@ -49,12 +52,15 @@
     --mg-text-secondary: #9A8E82;
     --mg-text-muted:     #6B6057;
     --mg-card-front:     #2E2A26;
-    --mg-card-icon:      #7C9EF8;
-    --mg-card-matched-bg:rgba(74, 124, 246, 0.12);
+    --mg-card-icon:      #9DAAC4;
+    --mg-card-matched-bg:rgba(157, 170, 196, 0.14);
+    --mg-accent:         #9DAAC4;
+    --mg-grad-from:      #4A5468;
+    --mg-grad-to:        #5E5870;
     --mg-shadow:   4px 4px 10px rgba(0,0,0,0.35), -3px -3px 8px rgba(255,255,255,0.03);
     --mg-shadow-sm:2px 2px 6px rgba(0,0,0,0.28),  -2px -2px 4px rgba(255,255,255,0.025);
     --mg-shadow-in:inset 2px 2px 6px rgba(0,0,0,0.35), inset -2px -2px 5px rgba(255,255,255,0.025);
-    --mg-match-ring: rgba(74, 124, 246, 0.55);
+    --mg-match-ring: rgba(157, 170, 196, 0.50);
   }
 }
 
@@ -68,12 +74,15 @@
   --mg-text-secondary: #8B7D6B;
   --mg-text-muted:     #B5A898;
   --mg-card-front:     #F8F4EE;
-  --mg-card-icon:      #4A7CF6;
-  --mg-card-matched-bg:rgba(74, 124, 246, 0.08);
+  --mg-card-icon:      #5A6B86;
+  --mg-card-matched-bg:rgba(90, 107, 134, 0.10);
+  --mg-accent:         #5A6B86;
+  --mg-grad-from:      #6E7E99;
+  --mg-grad-to:        #8A8299;
   --mg-shadow:   4px 4px 10px rgba(0,0,0,0.07), -3px -3px 8px rgba(255,255,255,0.85);
   --mg-shadow-sm:2px 2px 6px rgba(0,0,0,0.06),  -2px -2px 4px rgba(255,255,255,0.80);
   --mg-shadow-in:inset 2px 2px 6px rgba(0,0,0,0.07), inset -2px -2px 5px rgba(255,255,255,0.70);
-  --mg-match-ring: rgba(74, 124, 246, 0.45);
+  --mg-match-ring: rgba(90, 107, 134, 0.40);
 }
 
 [data-theme="dark"] {
@@ -85,12 +94,15 @@
   --mg-text-secondary: #9A8E82;
   --mg-text-muted:     #6B6057;
   --mg-card-front:     #2E2A26;
-  --mg-card-icon:      #7C9EF8;
-  --mg-card-matched-bg:rgba(74, 124, 246, 0.12);
+  --mg-card-icon:      #9DAAC4;
+  --mg-card-matched-bg:rgba(157, 170, 196, 0.14);
+  --mg-accent:         #9DAAC4;
+  --mg-grad-from:      #4A5468;
+  --mg-grad-to:        #5E5870;
   --mg-shadow:   4px 4px 10px rgba(0,0,0,0.35), -3px -3px 8px rgba(255,255,255,0.03);
   --mg-shadow-sm:2px 2px 6px rgba(0,0,0,0.28),  -2px -2px 4px rgba(255,255,255,0.025);
   --mg-shadow-in:inset 2px 2px 6px rgba(0,0,0,0.35), inset -2px -2px 5px rgba(255,255,255,0.025);
-  --mg-match-ring: rgba(74, 124, 246, 0.55);
+  --mg-match-ring: rgba(157, 170, 196, 0.50);
 }
 
 /* ── Base ────────────────────────────────────────────── */

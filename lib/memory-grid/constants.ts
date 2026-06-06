@@ -7,11 +7,19 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
   hard:   { rows: 4, cols: 5, pairs: 10 },
 };
 
-/** All 10 card icons – Easy uses first 6, Normal 8, Hard all 10 */
+/** All 10 card faces – Easy uses first 6, Normal 8, Hard all 10 */
 export const CARD_ICONS: IconName[] = [
-  'Sparkles', 'Gem', 'Rocket', 'Moon', 'Zap',
-  'Brain', 'Code', 'Coffee', 'Gamepad2', 'Star',
+  '🦊', '🐼', '🦁', '🐸', '🐧',
+  '🦉', '🐙', '🦋', '🐢', '🐝',
 ];
+
+/** Accessible names for each emoji face (used in aria-labels) */
+export const ICON_LABELS: Record<IconName, string> = {
+  '🦊': 'Fox',     '🐼': 'Panda',   '🦁': 'Lion',
+  '🐸': 'Frog',    '🐧': 'Penguin', '🦉': 'Owl',
+  '🐙': 'Octopus', '🦋': 'Butterfly','🐢': 'Turtle',
+  '🐝': 'Bee',
+};
 
 /* ── i18n strings ────────────────────────────────────── */
 type TKey =
