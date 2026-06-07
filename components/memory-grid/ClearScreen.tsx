@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Share2, Copy, RotateCcw, Home } from 'lucide-react';
 import { T } from '@/lib/memory-grid/constants';
 import { formatTime } from '@/lib/memory-grid/scoring';
+import Leaderboard from './Leaderboard';
 import type { Difficulty, Language } from './types';
 
 interface ClearScreenProps {
@@ -13,6 +14,8 @@ interface ClearScreenProps {
   mistakes: number;
   difficulty: Difficulty;
   isNewBest: boolean;
+  rank: number;
+  playerName: string;
   onRestart: () => void;
   onHome: () => void;
 }
@@ -64,18 +67,21 @@ export default function ClearScreen({
   mistakes,
   difficulty,
   isNewBest,
+  rank,
+  playerName,
   onRestart,
   onHome,
 }: ClearScreenProps) {
   const t = T[lang];
   const [copied, setCopied] = useState(false);
+  const displayName = playerName.trim() || t.anonymous;
 
   /* Build the share text in the user's language */
   function buildShareText(): string {
     const url = typeof window !== 'undefined' ? window.location.href : '';
     if (lang === 'ja') {
       return (
-        `Memory Gridをクリア！\n` +
+        `${displayName} がMemory Gridをクリア！\n` +
         `Score: ${score}\n` +
         `Time: ${elapsed}s\n` +
         `Mistakes: ${mistakes}\n\n` +
@@ -83,7 +89,7 @@ export default function ClearScreen({
       );
     }
     return (
-      `I cleared Memory Grid!\n` +
+      `${displayName} cleared Memory Grid!\n` +
       `Score: ${score}\n` +
       `Time: ${elapsed}s\n` +
       `Mistakes: ${mistakes}\n\n` +
@@ -138,9 +144,12 @@ export default function ClearScreen({
           <h2 className="text-2xl font-bold" style={{ color: 'var(--mg-text)' }}>
             {t.cleared}
           </h2>
-          {isNewBest && (
+          <p className="text-sm mt-0.5" style={{ color: 'var(--mg-text-secondary)' }}>
+            {displayName}
+          </p>
+          {isNewBest ? (
             <span
-              className="inline-block mt-1 text-xs font-semibold px-2.5 py-0.5 rounded-full"
+              className="inline-block mt-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full"
               style={{
                 background: 'linear-gradient(135deg, var(--mg-grad-from), var(--mg-grad-to))',
                 color: '#fff',
@@ -148,7 +157,14 @@ export default function ClearScreen({
             >
               {t.newBest}
             </span>
-          )}
+          ) : rank > 0 ? (
+            <span
+              className="inline-block mt-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full"
+              style={{ background: 'var(--mg-surface-raised)', color: 'var(--mg-accent)' }}
+            >
+              {t.records} #{rank}
+            </span>
+          ) : null}
         </div>
 
         {/* ── Result table ──────────────────────────── */}
@@ -168,6 +184,11 @@ export default function ClearScreen({
               month: 'short', day: 'numeric', year: 'numeric',
             })}
           />
+        </div>
+
+        {/* ── Leaderboard (highlights this run) ──────── */}
+        <div className="mb-5">
+          <Leaderboard difficulty={difficulty} lang={lang} highlightRank={rank} />
         </div>
 
         {/* ── Action buttons ────────────────────────── */}

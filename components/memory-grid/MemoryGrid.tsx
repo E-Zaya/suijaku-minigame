@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { DIFFICULTY_CONFIG, CARD_ICONS } from '@/lib/memory-grid/constants';
 import { calcScore } from '@/lib/memory-grid/scoring';
-import { saveBest, isNewBest } from '@/lib/memory-grid/storage';
+import { addRecord, getPlayerName, savePlayerName } from '@/lib/memory-grid/storage';
 import StartScreen from './StartScreen';
 import SidePanel from './SidePanel';
 import GameBoard from './GameBoard';
@@ -39,6 +39,7 @@ export default function MemoryGrid() {
   /* ── Settings (lazy-init from localStorage — safe with ssr:false) ── */
   const [lang,  setLang]  = useState<Language>(() => (localStorage.getItem('mg_lang')  as Language) || 'en');
   const [theme, setTheme] = useState<Theme>(   () => (localStorage.getItem('mg_theme') as Theme)    || 'auto');
+  const [playerName, setPlayerName] = useState<string>(() => getPlayerName());
 
   /* ── Game state ──────────────────────────────────── */
   const [phase,       setPhase]       = useState<GamePhase>('start');
@@ -50,6 +51,8 @@ export default function MemoryGrid() {
   const [isRunning,   setIsRunning]   = useState(false);
   const [finalScore,  setFinalScore]  = useState(0);
   const [newBest,     setNewBest]     = useState(false);
+  const [finalRank,   setFinalRank]   = useState(0);
+  const [round,       setRound]       = useState(0);
 
   /* Refs — avoid stale closures inside setTimeout / setInterval */
   const cardsRef    = useRef<CardData[]>([]);
@@ -58,8 +61,10 @@ export default function MemoryGrid() {
   const mistakesRef = useRef(0);
   const matchedRef  = useRef(0);
   const lockedRef   = useRef(false);
+  const nameRef     = useRef(playerName);
 
   useEffect(() => { cardsRef.current = cards; }, [cards]);
+  useEffect(() => { nameRef.current = playerName; }, [playerName]);
 
   /* ── Theme → <html data-theme> ───────────────────── */
   useEffect(() => {
@@ -97,6 +102,7 @@ export default function MemoryGrid() {
     setIsRunning(false);
     setFinalScore(0);
     setNewBest(false);
+    setRound((r) => r + 1);
     setPhase('playing');
   }, []);
 
@@ -135,18 +141,16 @@ export default function MemoryGrid() {
 
         if (matchedRef.current === DIFFICULTY_CONFIG[difficulty].pairs) {
           const score = calcScore(elapsedRef.current, mistakesRef.current);
-          const nb    = isNewBest(score, difficulty);
-          if (nb) {
-            saveBest({
-              score,
-              timeSeconds: elapsedRef.current,
-              mistakes:    mistakesRef.current,
-              difficulty,
-              date: new Date().toISOString(),
-            });
-          }
+          const placedRank = addRecord(difficulty, {
+            name:        nameRef.current.trim(),
+            score,
+            timeSeconds: elapsedRef.current,
+            mistakes:    mistakesRef.current,
+            date:        new Date().toISOString(),
+          });
           setFinalScore(score);
-          setNewBest(nb);
+          setNewBest(placedRank === 1);
+          setFinalRank(placedRank);
           setIsRunning(false);
           setTimeout(() => setPhase('cleared'), 420);
         }
@@ -184,10 +188,14 @@ export default function MemoryGrid() {
     setTheme(next);
     localStorage.setItem('mg_theme', next);
   };
+  const changeName = (name: string) => {
+    setPlayerName(name);
+    savePlayerName(name);
+  };
 
   /* Reusable JSX for the two-column game layout */
   const boardLayout = (interactive: boolean) => (
-    <div className="flex flex-col md:flex-row gap-4 min-h-screen p-3 md:p-5 items-start">
+    <div className="flex flex-col md:flex-row gap-4 min-h-screen md:h-screen md:overflow-hidden p-3 md:p-5 items-start md:items-stretch">
       <SidePanel
         lang={lang}
         elapsed={elapsed}
@@ -196,10 +204,12 @@ export default function MemoryGrid() {
         onRestart={() => startGame(difficulty)}
         onBack={() => setPhase('start')}
       />
-      <div className="flex-1 w-full min-w-0">
+      <div className="flex-1 w-full min-w-0 flex items-center justify-center">
         <GameBoard
+          key={round}
           cards={cards}
           cols={DIFFICULTY_CONFIG[difficulty].cols}
+          rows={DIFFICULTY_CONFIG[difficulty].rows}
           mismatchIds={interactive ? mismatchIds : []}
           onCardClick={interactive ? handleCardClick : () => {}}
         />
@@ -218,6 +228,8 @@ export default function MemoryGrid() {
           lang={lang}
           theme={theme}
           difficulty={difficulty}
+          playerName={playerName}
+          onNameChange={changeName}
           onStart={startGame}
           onSelectDifficulty={setDifficulty}
           onToggleLang={toggleLang}
@@ -239,6 +251,8 @@ export default function MemoryGrid() {
             mistakes={mistakes}
             difficulty={difficulty}
             isNewBest={newBest}
+            rank={finalRank}
+            playerName={playerName}
             onRestart={() => startGame(difficulty)}
             onHome={() => setPhase('start')}
           />

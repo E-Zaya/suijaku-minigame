@@ -128,6 +128,27 @@ body {
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── Deal-in entrance (staggered via inline animation-delay) ── */
+@keyframes mg-deal {
+  from { opacity: 0; transform: translateY(14px) scale(0.9); }
+  to   { opacity: 1; transform: none; }
+}
+.mg-deal {
+  animation: mg-deal 0.34s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ── Hover lift on face-down cards (pointer devices only) ── */
+@media (hover: hover) {
+  .mg-card-wrapper:hover:not(:disabled) .mg-card-inner:not(.is-flipped) {
+    transform: translateY(-6px) scale(1.03);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-deal { animation: none; }
+  .mg-card-inner { transition: none; }
+}
+
 /* Face-up state */
 .mg-card-inner.is-flipped {
   transform: rotateY(180deg);

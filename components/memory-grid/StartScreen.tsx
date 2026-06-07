@@ -1,14 +1,17 @@
 'use client';
 
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon, Monitor, User } from 'lucide-react';
 import { T } from '@/lib/memory-grid/constants';
 import { getBest } from '@/lib/memory-grid/storage';
+import Leaderboard from './Leaderboard';
 import type { Difficulty, Language, Theme } from './types';
 
 interface StartScreenProps {
   lang: Language;
   theme: Theme;
   difficulty: Difficulty;
+  playerName: string;
+  onNameChange: (name: string) => void;
   onStart: (difficulty: Difficulty) => void;
   onSelectDifficulty: (d: Difficulty) => void;
   onToggleLang: () => void;
@@ -93,6 +96,8 @@ export default function StartScreen({
   lang,
   theme,
   difficulty,
+  playerName,
+  onNameChange,
   onStart,
   onSelectDifficulty,
   onToggleLang,
@@ -156,6 +161,30 @@ export default function StartScreen({
           </p>
         </div>
 
+        {/* Name input */}
+        <p
+          className="text-[11px] uppercase tracking-widest font-medium mb-2 px-1"
+          style={{ color: 'var(--mg-text-muted)' }}
+        >
+          {t.name}
+        </p>
+        <div
+          className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl mb-6"
+          style={{ background: 'var(--mg-surface-raised)', boxShadow: 'var(--mg-shadow-in)' }}
+        >
+          <User size={16} className="shrink-0" style={{ color: 'var(--mg-text-muted)' }} />
+          <input
+            type="text"
+            value={playerName}
+            onChange={(e) => onNameChange(e.target.value.slice(0, 16))}
+            placeholder={t.namePlaceholder}
+            maxLength={16}
+            className="flex-1 min-w-0 bg-transparent text-sm font-medium outline-none"
+            style={{ color: 'var(--mg-text)' }}
+            aria-label={t.name}
+          />
+        </div>
+
         {/* Difficulty selector */}
         <p
           className="text-[11px] uppercase tracking-widest font-medium mb-2 px-1"
@@ -195,6 +224,11 @@ export default function StartScreen({
         >
           {t.start}
         </button>
+
+        {/* Leaderboard for the selected difficulty */}
+        <div className="mt-6">
+          <Leaderboard difficulty={difficulty} lang={lang} />
+        </div>
       </div>
 
       {/* Subtle footer hint */}

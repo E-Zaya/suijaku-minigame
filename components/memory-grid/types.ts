@@ -26,12 +26,13 @@ export interface DifficultyConfig {
   pairs: number;
 }
 
-/** Persisted high-score record */
-export interface BestScore {
+/** A single persisted leaderboard entry */
+export interface ScoreRecord {
+  /** Player-entered name */
+  name: string;
   score: number;
   timeSeconds: number;
   mistakes: number;
-  difficulty: Difficulty;
   /** ISO-8601 date string */
   date: string;
 }

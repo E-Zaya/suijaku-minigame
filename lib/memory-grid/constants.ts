@@ -27,7 +27,8 @@ type TKey =
   | 'score' | 'time' | 'mistakes' | 'best'
   | 'share' | 'copied' | 'cleared' | 'newBest'
   | 'difficulty' | 'easy' | 'normal' | 'hard'
-  | 'easyDesc' | 'normalDesc' | 'hardDesc';
+  | 'easyDesc' | 'normalDesc' | 'hardDesc'
+  | 'name' | 'namePlaceholder' | 'records' | 'noRecords' | 'anonymous';
 
 export const T: Record<Language, Record<TKey, string>> = {
   en: {
@@ -50,6 +51,11 @@ export const T: Record<Language, Record<TKey, string>> = {
     easyDesc:    '3×4 · 6 pairs',
     normalDesc:  '4×4 · 8 pairs',
     hardDesc:    '4×5 · 10 pairs',
+    name:            'Name',
+    namePlaceholder: 'Enter your name',
+    records:         'Records',
+    noRecords:       'No records yet — be the first!',
+    anonymous:       'Anonymous',
   },
   ja: {
     title:       'Memory Grid',
@@ -71,5 +77,10 @@ export const T: Record<Language, Record<TKey, string>> = {
     easyDesc:    '3×4 · 6ペア',
     normalDesc:  '4×4 · 8ペア',
     hardDesc:    '4×5 · 10ペア',
+    name:            'なまえ',
+    namePlaceholder: '名前を入力',
+    records:         'ランキング',
+    noRecords:       'まだ記録がありません。最初の一人に！',
+    anonymous:       'ななし',
   },
 };

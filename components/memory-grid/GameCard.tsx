@@ -5,11 +5,12 @@ import type { CardData } from './types';
 
 interface GameCardProps {
   card: CardData;
+  index: number;
   isMismatch: boolean;
   onClick: (id: number) => void;
 }
 
-export default function GameCard({ card, isMismatch, onClick }: GameCardProps) {
+export default function GameCard({ card, index, isMismatch, onClick }: GameCardProps) {
   const isVisible = card.isFlipped || card.isMatched;
   const label = ICON_LABELS[card.iconName];
 
@@ -23,10 +24,11 @@ export default function GameCard({ card, isMismatch, onClick }: GameCardProps) {
   return (
     <button
       /* perspective wrapper sits on the button so preserve-3d works */
-      className="mg-card-wrapper block w-full aspect-[3/4] p-0 bg-transparent border-0
+      className="mg-card-wrapper mg-deal block w-full aspect-[3/4] p-0 bg-transparent border-0
                  cursor-pointer rounded-2xl
                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1
                  disabled:cursor-default"
+      style={{ animationDelay: `${Math.min(index, 20) * 28}ms` }}
       onClick={() => onClick(card.id)}
       disabled={card.isMatched}
       aria-label={isVisible ? label : 'Hidden card'}
